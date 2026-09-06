@@ -20,6 +20,13 @@ module synchronous_fifo #(
 
     // Internal data storage
     logic [DATA_WIDTH-1:0] memory [0:DEPTH-1];
-    
+
+    // Calculate the number of bits required for each pointer
+    localparam int PTR_WIDTH = (DEPTH <= 1) ? 1 : $clog2(DEPTH);
+
+    // Pointers to the next write location and oldest unread location
+    logic [PTR_WIDTH-1:0] write_ptr;
+    logic [PTR_WIDTH-1:0] read_ptr;
+
 endmodule
 
