@@ -46,5 +46,18 @@ module synchronous_fifo #(
     assign write_accept = wr_en && !full;          // "!" means NOT, and "&&" means AND. so this accepts the write when a write is requested and it is not full at the same time. 
     assign read_accept  = rd_en && !empty;         // same as above, this accepts the read when a read is requested and it is not empty at the same time
 
+
+    // Reset the FIFO state on a rising clock edge
+    always_ff @(posedge clk) begin             //because rst_n is not listed in the paranthesis, this is a synchronous reset, meaning that the reset will only take effect on the rising edge of the clock, not immediately when rst_n goes low
+        if (!rst_n) begin                    //checks if the reset button is being pressed, if it is, then it resets the fifo to its initial state, which is empty, and all the pointers are set to zero
+            write_ptr <= '0;
+            read_ptr  <= '0;
+            occupancy <= '0;                 //basically resetting all signals to 0, this is a SV shortcut. ('0' means all bits are set to 0)
+            rd_data   <= '0;
+        end
+    end
+
+
+
 endmodule
 
