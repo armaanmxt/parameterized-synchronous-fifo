@@ -67,6 +67,17 @@ module synchronous_fifo #(
                 else
                     write_ptr <= write_ptr + 1'b1;         //if the write pointer is not at the last entry, then it just increments the write pointer by 1, so that the next write will go to the next entry in the FIFO.
             end
+
+            //return oldest value when a read is accepted and increment the read pointer to the next oldest value
+             if (read_accept) begin                   //only execute this code if a read is accepted.
+                rd_data <= memory[read_ptr];          //take the value at the location pointed to by the read pointer and output it to rd_data. (the value being read from the FIFO))
+
+                // Wrap back to address zero after the final entry
+                if (read_ptr == DEPTH - 1)             //if the read pointer is at the last entry of the FIFO, then it resets back to 0.
+                    read_ptr <= '0;
+                else
+                    read_ptr <= read_ptr + 1'b1;       //otherwise, normally just increment the read pointer by 1, so that the next read will go to the next entry in the FIFO.
+            end
         end
     end
 
