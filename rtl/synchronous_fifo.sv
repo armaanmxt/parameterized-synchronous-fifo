@@ -4,29 +4,34 @@ module synchronous_fifo #(
     parameter int DEPTH = 16
 ) (
     input logic clk,
-    input logic rst_n,
+    input logic rst_n,                             //active low reset, resets the FIFO to empty state
 
-    input logic wr_en,
+    input logic wr_en,                             //requesting to be written, should be rejected if full
     input logic [DATA_WIDTH - 1 : 0] wr_data,
 
-    input logic rd_en, 
-    output logic [DATA_WIDTH - 1 : 0] rd_data,
+    input logic rd_en,                           //requesting to be read, should be rejected if empty                                                                   
+    output logic [DATA_WIDTH - 1 : 0] rd_data,   //this is output because it is the data that is read from the FIFO
 
-    output logic full,
-    output logic empty,
-    output logic [$clog2(DEPTH+1)-1:0] occupancy
+    output logic full,                             //full = 1 means every entry is occupied, no more data can be written
+    output logic empty,                            // empty = 1 means every entry is empty, no more data can be read
+    output logic [$clog2(DEPTH+1)-1:0] occupancy    // gives the exact number of stored entries
 
 );
 
     // Internal data storage
-    logic [DATA_WIDTH-1:0] memory [0:DEPTH-1];
+    logic [DATA_WIDTH-1:0] memory [0:DEPTH-1];        // The FIFO memory array, this is the internal storage for the FIFO, it is an array of registers that can hold DEPTH number of entries, each entry is DATA_WIDTH bits wide
 
     // Calculate the number of bits required for each pointer
-    localparam int PTR_WIDTH = (DEPTH <= 1) ? 1 : $clog2(DEPTH);
+    localparam int PTR_WIDTH = (DEPTH <= 1) ? 1 : $clog2(DEPTH);        //pointer width comes from DEPTH 
+//basically creates an internal constant that the module calculates on its own
+//$clog2, in hardware this is basically a calculation that determines how many bits are needed to count/represent a number, in our case the number we want to count is the variable DEPTH
+// so the right side of the ":" is the number of bits needed to calculate DEPTH value
+// left side is basically saying that if someone puts the depth as 1 or less, its just a safety check for that
+
 
     // Pointers to the next write location and oldest unread location
-    logic [PTR_WIDTH-1:0] write_ptr;
-    logic [PTR_WIDTH-1:0] read_ptr;
+    logic [PTR_WIDTH-1:0] write_ptr;      //where the next accepted write value will be stored, this is the pointer that points to the next location in the FIFO memory array where a new value can be written
+    logic [PTR_WIDTH-1:0] read_ptr;       //where the next read value will be taken from, this is the pointer that points to the next location in the FIFO memory array where a value can be read from
 
 endmodule
 
