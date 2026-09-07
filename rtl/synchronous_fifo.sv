@@ -47,13 +47,26 @@ module synchronous_fifo #(
     assign read_accept  = rd_en && !empty;         // same as above, this accepts the read when a read is requested and it is not empty at the same time
 
 
-    // Reset the FIFO state on a rising clock edge
+    // Update FIFO state on each rising clock edge
     always_ff @(posedge clk) begin             //because rst_n is not listed in the paranthesis, this is a synchronous reset, meaning that the reset will only take effect on the rising edge of the clock, not immediately when rst_n goes low
         if (!rst_n) begin                    //checks if the reset button is being pressed, if it is, then it resets the fifo to its initial state, which is empty, and all the pointers are set to zero
             write_ptr <= '0;
             read_ptr  <= '0;
             occupancy <= '0;                 //basically resetting all signals to 0, this is a SV shortcut. ('0' means all bits are set to 0)
             rd_data   <= '0;
+        end
+
+        else begin
+            // Store an accepted write at the current write pointer
+            if (write_accept) begin                //only begin if a write is accepted, this means request was made + fifo is not full
+                memory[write_ptr] <= wr_data;        //take whatever wr_data (data being written) is and store it in the memory array at the location pointed to by write_ptr. (its doing all this at the next clock edge because of the always_ff block)
+
+                // Wrap back to address zero after the final entry
+                if (write_ptr == DEPTH - 1)          //this is if the write pointer is at the last entry of the FIFO, then it wraps back to 0, so that the next write will go to the first entry of the FIFO.
+                    write_ptr <= '0;                 //reset the write pointer to 0
+                else
+                    write_ptr <= write_ptr + 1'b1;         //if the write pointer is not at the last entry, then it just increments the write pointer by 1, so that the next write will go to the next entry in the FIFO.
+            end
         end
     end
 
