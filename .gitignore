@@ -10,3 +10,4 @@ sim_build/
 __pycache__/
 .pytest_cache/
 results.xml
+.venv/
