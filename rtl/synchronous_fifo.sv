@@ -13,7 +13,7 @@ module synchronous_fifo #(
     output logic [DATA_WIDTH - 1 : 0] rd_data,   //this is output because it is the data that is read from the FIFO
 
     output logic full,                             //full = 1 means every entry is occupied, no more data can be written
-    output logic empty,                            // empty = 1 means every entry is empty, no more data can be read
+    output logic empty,                            // occupancy is zero, so no valid unread data exists
     output logic [$clog2(DEPTH+1)-1:0] occupancy    // gives the exact number of stored entries
 
 );
@@ -32,6 +32,19 @@ module synchronous_fifo #(
     // Pointers to the next write location and oldest unread location
     logic [PTR_WIDTH-1:0] write_ptr;      //where the next accepted write value will be stored, this is the pointer that points to the next location in the FIFO memory array where a new value can be written
     logic [PTR_WIDTH-1:0] read_ptr;       //where the next read value will be taken from, this is the pointer that points to the next location in the FIFO memory array where a value can be read from
+
+
+    // Internal signals indicating whether each request is accepted
+    logic write_accept;            //these are just internal wires that we are defining to indicate whether a write or read request is accepted, they are not part of the module's interface, they are just used internally to control the behavior of the FIFO
+    logic read_accept;             //same with this
+
+    // FIFO status flags
+    assign empty = (occupancy == 0);           //empty is high (= 1), when occupancy is zero
+    assign full  = (occupancy == DEPTH);       // full is when occupancy is equal to the depth of the FIFO, meaning all entries are occupied
+
+    // Reject writes while full and reads while empty
+    assign write_accept = wr_en && !full;          // "!" means NOT, and "&&" means AND. so this accepts the write when a write is requested and it is not full at the same time. 
+    assign read_accept  = rd_en && !empty;         // same as above, this accepts the read when a read is requested and it is not empty at the same time
 
 endmodule
 
