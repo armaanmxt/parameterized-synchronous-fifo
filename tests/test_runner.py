@@ -3,7 +3,7 @@ from pathlib import Path
 from cocotb_tools.runner import get_runner
 
 
-def test_fifo():
+def test_fifo():                             #this is not the actual test, this just enables the environment to run the cocotb test. 
     project_root = Path(__file__).resolve().parents[1]
     rtl_source = project_root / "rtl" / "synchronous_fifo.sv"
     build_dir = project_root / "sim_build"
