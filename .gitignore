@@ -1,0 +1,12 @@
+# Simulation build files
+build/
+sim_build/
+
+# Waveform files
+*.vcd
+*.fst
+
+# Python and cocotb files
+__pycache__/
+.pytest_cache/
+results.xml
