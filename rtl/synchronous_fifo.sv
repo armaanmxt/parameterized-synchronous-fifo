@@ -78,6 +78,14 @@ module synchronous_fifo #(
                 else
                     read_ptr <= read_ptr + 1'b1;       //otherwise, normally just increment the read pointer by 1, so that the next read will go to the next entry in the FIFO.
             end
+
+
+            // Update the number of occupied FIFO entries
+            case ({write_accept, read_accept})             //this combines two signals into one 2-bit signal (first bit is write accept and second bit represents read accept)
+                2'b10: occupancy <= occupancy + 1'b1;      //this is the write accept case, and this would increase occupancy by +1.
+                2'b01: occupancy <= occupancy - 1'b1;      //this is the read acceptance case, and this would decrease occupancy by -1.
+                default: occupancy <= occupancy;           //either both are 0 or both are 1, either case the occupancy stays unchanged, so it just assigns occupancy to itself, which means no change.
+            endcase
         end
     end
 
